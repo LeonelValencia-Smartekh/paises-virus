@@ -63,3 +63,34 @@ def query_country(country):
     except Exception as e:
         logging.error(f'Error inesperado para {country}: {e}')
         return None
+    
+
+def main():
+    # Leer el archivo JSON
+    with open('data/input_10.json') as f:
+        records = json.load(f)
+
+    # Deduplicar IPs
+    unique_ips = set(record['ip'] for record in records)
+    results = []
+
+    # Consultar VirusTotal
+    for ip in unique_ips:
+        vt_data = query_virustotal(ip)
+        results.append({'ip': ip, **(vt_data or {})})
+        time.sleep(15)  # Manejo de rate limit
+
+    # Consultar países
+    for record in records:
+        country_data = query_country(record['country'])
+        for result in results:
+            if result['ip'] == record['ip']:
+                result.update({'country': record['country'], **(country_data or {})})
+
+    # Crear DataFrame y exportar
+    df = pd.DataFrame(results)
+    df.to_csv('reporte_final_vt.csv', index=False)
+    logging.info('Reporte generado: reporte_final_vt.csv')
+
+if __name__ == '__main__':
+    main()
