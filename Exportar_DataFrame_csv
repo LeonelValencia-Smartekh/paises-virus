@@ -1,0 +1,49 @@
+import os
+import pandas as pd
+import logging
+
+# Set up logging to console
+logging.basicConfig(
+    level=logging.INFO,
+    filename='Exportar.log',  # 'Exportar.log' needs to be a string
+    filemode='a',
+    format='%(asctime)s - %(levelname)s - %(message)s', # Corrected format string syntax
+    encoding="utf-8" # Special characters
+)
+
+# Create Sample DataFrames
+logging.info("Creating two sample DataFrames...")
+
+# DataFrame 1: User Information
+data1 = {'UserID': [101, 102, 103, 104],
+         'Name': ['Alice', 'Bob', 'Charlie', 'David'],
+         'City': ['New York', 'Los Angeles', 'Chicago', 'Houston']}
+df_users = pd.DataFrame(data1)
+logging.info(f"Created df_users with {len(df_users)} rows.")
+
+# DataFrame 2: Order Information (with a common key 'UserID' later IP's) 
+data2 = {'OrderID': [1, 2, 3, 4, 5],
+         'UserID': [101, 103, 101, 102, 105], # Note: User 105 not in df_users, 104 missing orders
+         'Amount': [150.50, 75.20, 200.00, 99.99, 45.00]}
+df_orders = pd.DataFrame(data2)
+logging.info(f"Created df_orders with {len(df_orders)} rows.")
+
+# 3. Merge DataFrames
+logging.info("Merging DataFrames on 'UserID'...")
+merged_df = pd.merge(df_users, df_orders, on='UserID', how='inner')
+logging.info(f"Merged DataFrame created with {len(merged_df)} rows.")
+
+# 4. Export to CSV
+output_filename = 'merged_data.csv'
+logging.info(f"Exporting merged DataFrame to '{output_filename}'...")
+
+try:
+    merged_df.to_csv(output_filename, index=False) # index=False prevents writing DataFrame index as a column
+    logging.info(f"Successfully exported data to {output_filename}.")
+    if os.path.exists(output_filename):
+        logging.info(f"File size: {os.path.getsize(output_filename)} bytes.")
+except Exception as e:
+    logging.error(f"Error exporting to CSV: {e}")
+
+print("\n--- Script Finished ---")
+print("Check 'merged_data.csv' and the console logs for details.")
