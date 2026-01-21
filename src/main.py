@@ -44,3 +44,22 @@ def query_virustotal(ip):
     except Exception as e:
         logging.error(f'Error inesperado para {ip}: {e}')
         return None
+    
+# Función para consultar la API de países
+
+def query_country(country):
+    url = f'{BASE_URL_COUNTRIES}/{country}'
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        return {
+            'region': data.get('region'),
+            'capital': data.get('capital')
+        }
+    except requests.exceptions.HTTPError as err:
+        logging.error(f'Error en la consulta de país para {country}: {err}')
+        return None
+    except Exception as e:
+        logging.error(f'Error inesperado para {country}: {e}')
+        return None
